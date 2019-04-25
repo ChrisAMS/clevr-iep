@@ -54,6 +54,7 @@ def run_batch(cur_batch, model):
   image_batch = np.concatenate(cur_batch, 0).astype(np.float32)
   image_batch = (image_batch / 255.0 - mean) / std
   image_batch = torch.FloatTensor(image_batch).cuda()
+  #image_batch = torch.FloatTensor(image_batch)
   image_batch = torch.autograd.Variable(image_batch, volatile=True)
 
   feats = model(image_batch)
@@ -72,7 +73,7 @@ def main(args):
     idx_set.add(idx)
   input_paths.sort(key=lambda x: x[1])
   assert len(idx_set) == len(input_paths)
-  assert min(idx_set) == 0 and max(idx_set) == len(idx_set) - 1
+  # assert min(idx_set) == 0 and max(idx_set) == len(idx_set) - 1
   if args.max_images is not None:
     input_paths = input_paths[:args.max_images]
   print(input_paths[0])

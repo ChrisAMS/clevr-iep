@@ -21,6 +21,12 @@ import torch.nn.functional as F
 import numpy as np
 import h5py
 
+import sys
+# print(sys.path)
+sys.path.insert(0, '/content/clevr-iep')
+# print(sys.path)
+
+
 import iep.utils as utils
 import iep.preprocess
 from iep.data import ClevrDataset, ClevrDataLoader
@@ -104,6 +110,10 @@ parser.add_argument('--checkpoint_every', default=10000, type=int)
 
 
 def main(args):
+  # import os
+  # cwd = os.getcwd()
+  # print(cwd)
+  # return
   if args.randomize_checkpoint_path == 1:
     name, ext = os.path.splitext(args.checkpoint_path)
     num = random.randint(1, 1000000)
@@ -257,8 +267,8 @@ def train_loop(args, train_loader, val_loader):
           pg_optimizer.step()
 
       if t % args.record_loss_every == 0:
-        print(t, loss.data[0])
-        stats['train_losses'].append(loss.data[0])
+        print(t, loss.data)
+        stats['train_losses'].append(float(loss.data))
         stats['train_losses_ts'].append(t)
         if reward is not None:
           stats['train_rewards'].append(reward)
@@ -302,6 +312,7 @@ def train_loop(args, train_loader, val_loader):
         del checkpoint['execution_engine_state']
         del checkpoint['baseline_state']
         with open(args.checkpoint_path + '.json', 'w') as f:
+          #print(checkpoint)
           json.dump(checkpoint, f)
 
       if t == args.num_iterations:

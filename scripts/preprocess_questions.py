@@ -61,7 +61,34 @@ def main(args):
 
   print('Loading data')
   with open(args.input_questions_json, 'r') as f:
-    questions = json.load(f)['questions']
+    # questions keys: answer, question, program, index, image_index (transformed starting from zero)
+    data  = json.load(f)
+    print(len(data['question']))
+    return
+    imgs_idxs = set()
+    questions = []
+    for index, question in data['question'].items():
+      img_idx = data['image_index'][index]
+      imgs_idxs.add(img_idx)
+      q = {
+        'question': question,
+        'answer': data['answer'][index],
+        'program': data['program'][index],
+        'index': int(index),
+        'image_index': img_idx,
+        'question_family_index': data['question_family_index'][index]
+      }
+      questions.append(q)
+    questions.sort(key=lambda x: x['index'])
+    imgs_idxs = sorted(imgs_idxs)
+    mapper = {x: i for i, x in enumerate(imgs_idxs)}
+    for q in questions:
+      q['image_index'] = mapper[q['image_index']]
+    
+    # # DEBUG
+    # print('min img index: {}'.format(min(questions, key=lambda x: x['image_index'])['image_index']))
+    # print('max img index: {}'.format(max(questions, key=lambda x: x['image_index'])['image_index']))
+    # return
 
   # Either create the vocab or load it from disk
   if args.input_vocab_json == '' or args.expand_vocab == 1:
