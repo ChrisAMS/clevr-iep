@@ -63,8 +63,8 @@ def main(args):
   with open(args.input_questions_json, 'r') as f:
     # questions keys: answer, question, program, index, image_index (transformed starting from zero)
     data  = json.load(f)
-    print(len(data['question']))
-    return
+    # print(len(data['question']))
+    # return
     imgs_idxs = set()
     questions = []
     for index, question in data['question'].items():
