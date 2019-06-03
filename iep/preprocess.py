@@ -41,7 +41,13 @@ def tokenize(s, delim=' ',
     for p in punct_to_remove:
       s = s.replace(p, '')
 
-  tokens = s.split(delim)
+  # Fix for multiple word answer. All the answer is
+  # a single token.
+  if delim:
+    tokens = s.split(delim)
+  else:
+    tokens = [s]
+
   if add_start_token:
     tokens.insert(0, '<START>')
   if add_end_token:

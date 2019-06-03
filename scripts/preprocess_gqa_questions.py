@@ -67,19 +67,18 @@ def main(args):
     # return
     imgs_idxs = set()
     questions = []
-    for question in data:#.values():
-      img_idx = question['image_index']#[index]
+    for idx, question in data.items():
+      img_idx = question['imageId']
       imgs_idxs.add(img_idx)
       q = {
         'question': question['question'],
-        'answer': question['answer'],#[index],
+        'answer': question['answer'],
         #'program': data['program'][index],
-        'index': int(question['index']),
+        'index': int(idx),
         'image_index': img_idx,
         #'question_family_index': data['question_family_index'][index]
       }
       questions.append(q)
-    #questions.sort(key=lambda x: x['index'])
     imgs_idxs = sorted(imgs_idxs)
     mapper = {x: i for i, x in enumerate(imgs_idxs)}
     for q in questions:
@@ -94,8 +93,9 @@ def main(args):
   if args.input_vocab_json == '' or args.expand_vocab == 1:
     print('Building vocab')
     if 'answer' in questions[0]:
+      # Added empty delim to keep all the answer as a token.
       answer_token_to_idx = build_vocab(
-        (q['answer'] for q in questions)
+        (q['answer'] for q in questions), delim=''
       )
     question_token_to_idx = build_vocab(
       (q['question'] for q in questions),
@@ -129,7 +129,19 @@ def main(args):
           idx = len(vocab['question_token_to_idx'])
           vocab['question_token_to_idx'][word] = idx
           num_new_words += 1
+      num_new_answers = 0
+  
+      # Apparently, train and val in miniGQA have different
+      # answers.
+      for word in new_vocab['answer_token_to_idx']:
+        if word not in vocab['answer_token_to_idx']:
+          print('Found new answer %s' % word)
+          idx = len(vocab['answer_token_to_idx'])
+          vocab['answer_token_to_idx'][word] = idx
+          num_new_answers += 1
+
       print('Found %d new words' % num_new_words)
+      print('Found %d new answers' % num_new_answers)
 
   if args.output_vocab_json != '':
     with open(args.output_vocab_json, 'w') as f:
