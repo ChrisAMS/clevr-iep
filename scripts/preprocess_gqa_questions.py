@@ -31,6 +31,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--mode', default='prefix',
                     choices=['chain', 'prefix', 'postfix'])
 parser.add_argument('--input_questions_json', required=True)
+parser.add_argument('--input_filter_questions_json', default='')
 parser.add_argument('--input_vocab_json', default='')
 parser.add_argument('--expand_vocab', default=0, type=int)
 parser.add_argument('--unk_threshold', default=1, type=int)
@@ -67,18 +68,36 @@ def main(args):
     # return
     imgs_idxs = set()
     questions = []
+    filter_questions = []
+    if args.input_filter_questions_json != []:
+      with open(args.input_filter_questions_json,'r') as fq:
+        filter_questions = fq.read().splitlines()
     for idx, question in data.items():
-      img_idx = question['imageId']
-      imgs_idxs.add(img_idx)
-      q = {
-        'question': question['question'],
-        'answer': question['answer'],
-        #'program': data['program'][index],
-        'index': int(idx),
-        'image_index': img_idx,
-        #'question_family_index': data['question_family_index'][index]
-      }
-      questions.append(q)
+      if len(filter_questions) > 0:
+          if idx not in filter_questions:
+              img_idx = question['imageId']
+              imgs_idxs.add(img_idx)
+              q = {
+                'question': question['question'],
+                'answer': question['answer'],
+                #'program': data['program'][index],
+                'index': int(idx),
+                'image_index': img_idx,
+                #'question_family_index': data['question_family_index'][index]
+              }
+              questions.append(q)
+      else:
+          img_idx = question['imageId']
+          imgs_idxs.add(img_idx)
+          q = {
+            'question': question['question'],
+            'answer': question['answer'],
+            #'program': data['program'][index],
+            'index': int(idx),
+            'image_index': img_idx,
+            #'question_family_index': data['question_family_index'][index]
+          }
+          questions.append(q)
     imgs_idxs = sorted(imgs_idxs)
     mapper = {x: i for i, x in enumerate(imgs_idxs)}
     for q in questions:
